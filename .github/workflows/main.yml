@@ -1,4 +1,4 @@
-name: Build and Push to ECR
+name: Deploy to ECS
 
 on:
   push:
@@ -23,31 +23,8 @@ jobs:
     - name: Login to Amazon ECR
       uses: aws-actions/amazon-ecr-login@v1
 
-    - name: Build and push Docker image
-      id: build-image
+    - name: Build and push image
       run: |
-        docker build -t 337930178825.dkr.ecr.us-east-1.amazonaws.com/my-app:${{ github.sha }} .
-        docker tag 337930178825.dkr.ecr.us-east-1.amazonaws.com/my-app:${{ github.sha }} 337930178825.dkr.ecr.us-east-1.amazonaws.com/my-app:latest
-        docker push 337930178825.dkr.ecr.us-east-1.amazonaws.com/my-app:${{ github.sha }}
-        docker push 337930178825.dkr.ecr.us-east-1.amazonaws.com/my-app:latest
-        echo "image=337930178825.dkr.ecr.us-east-1.amazonaws.com/my-app:${{ github.sha }}" >> $GITHUB_OUTPUT
-
-    - name: Download task definition
-      run: |
-        aws ecs describe-task-definition --task-definition my-task-family --query taskDefinition > task-definition.json    
-        
-    - name: Fill in the new image ID in the Amazon ECS task definition
-      id: task-def
-      uses: aws-actions/amazon-ecs-render-task-definition@v1
-      with:
-         task-definition: task-definition.json
-         container-name: web-container
-         image: ${{ steps.build-image.outputs.image }}
-
-    - name: Deploy Amazon ECS task definition
-      uses: aws-actions/amazon-ecs-deploy-task-definition@v2
-      with:
-         task-definition: ${{ steps.task-def.outputs.task-definition }}
-         service: web-app-service
-         cluster: web-app-cluster
-         wait-for-service-stability: true
+        docker build -t myapp .
+        docker tag myapp:latest 337930178825.dkr.ecr.us-east-1.amazonaws.com/myapp:latest
+        docker push 337930178825.dkr.ecr.us-east-1.amazonaws.com/myapp:latest
