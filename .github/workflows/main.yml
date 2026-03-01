@@ -26,7 +26,7 @@ jobs:
     - name: Build and push Docker image
       id: build-image
       run: |
-        docker build -t 3337930178825.dkr.ecr.us-east-1.amazonaws.com/my-app:${{ github.sha }} .
+        docker build -t 337930178825.dkr.ecr.us-east-1.amazonaws.com/my-app:${{ github.sha }} .
         docker tag 337930178825.dkr.ecr.us-east-1.amazonaws.com/my-app:${{ github.sha }} 337930178825.dkr.ecr.us-east-1.amazonaws.com/my-app:latest
         docker push 337930178825.dkr.ecr.us-east-1.amazonaws.com/my-app:${{ github.sha }}
         docker push 337930178825.dkr.ecr.us-east-1.amazonaws.com/my-app:latest
