@@ -24,23 +24,29 @@ jobs:
       uses: aws-actions/amazon-ecr-login@v1
 
     - name: Build and push Docker image
+      id: build-image
       run: |
-        docker build -t my-app .
-        docker tag my-app:latest 337930178825.dkr.ecr.us-east-1.amazonaws.com/my-app:latest
+        docker build -t 337930178825.dkr.ecr.us-east-1.amazonaws.com/my-app:${{ github.sha }} .
+        docker tag 337930178825.dkr.ecr.us-east-1.amazonaws.com/my-app:${{ github.sha }} 337930178825.dkr.ecr.us-east-1.amazonaws.com/my-app:latest
+        docker push 337930178825.dkr.ecr.us-east-1.amazonaws.com/my-app:${{ github.sha }}
         docker push 337930178825.dkr.ecr.us-east-1.amazonaws.com/my-app:latest
-        echo "image=337930178825.dkr.ecr.us-east-1.amazonaws.com/my-app:$IMAGE_TAG" >> $GITHUB_OUTPUT
+        echo "image=337930178825.dkr.ecr.us-east-1.amazonaws.com/my-app:${{ github.sha }}" >> $GITHUB_OUTPUT
+
+    - name: Download task definition
+      run: |
+        aws ecs describe-task-definition --task-definition my-task-family --query taskDefinition > task-definition.json    
         
     - name: Fill in the new image ID in the Amazon ECS task definition
-       id: task-def
+      id: task-def
       uses: aws-actions/amazon-ecs-render-task-definition@v1
       with:
-         task-definition: .aws/task-definition.json
+         task-definition: task-definition.json
          container-name: web-container
-        image: ${{ steps.build-image.outputs.image }}
+         image: ${{ steps.build-image.outputs.image }}
 
     - name: Deploy Amazon ECS task definition
-       uses: aws-actions/amazon-ecs-deploy-task-definition@v2
-       with:
+      uses: aws-actions/amazon-ecs-deploy-task-definition@v2
+      with:
          task-definition: ${{ steps.task-def.outputs.task-definition }}
          service: web-app-service
          cluster: web-app-cluster
