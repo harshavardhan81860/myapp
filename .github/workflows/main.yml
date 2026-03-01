@@ -28,3 +28,18 @@ jobs:
         docker build -t my-app .
         docker tag my-app:latest 337930178825.dkr.ecr.us-east-1.amazonaws.com/my-app:latest
         docker push 337930178825.dkr.ecr.us-east-1.amazonaws.com/my-app:latest
+    - name: Fill in the new image ID in the Amazon ECS task definition
+       id: task-def
+      uses: aws-actions/amazon-ecs-render-task-definition@v1
+      with:
+         task-definition: .aws/task-definition.json
+         container-name: web-container
+        image: ${{ steps.build-image.outputs.image }}
+
+     - name: Deploy Amazon ECS task definition
+       uses: aws-actions/amazon-ecs-deploy-task-definition@v2
+       with:
+         task-definition: ${{ steps.task-def.outputs.task-definition }}
+         service: ${{ env.ECS_SERVICE }}
+         cluster: ${{ env.ECS_CLUSTER }}
+         wait-for-service-stability: true
