@@ -26,11 +26,11 @@ jobs:
     - name: Build and push Docker image
       id: build-image
       run: |
-        docker build -t 337930178825.dkr.ecr.us-east-1.amazonaws.com/myapp:${{ github.sha }} .
-        docker tag 337930178825.dkr.ecr.us-east-1.amazonaws.com/myapp:${{ github.sha }} 337930178825.dkr.ecr.us-east-1.amazonaws.com/myapp:latest
-        docker push 337930178825.dkr.ecr.us-east-1.amazonaws.com/myapp:${{ github.sha }}
-        docker push 337930178825.dkr.ecr.us-east-1.amazonaws.com/myapp:latest
-        echo "image=337930178825.dkr.ecr.us-east-1.amazonaws.com/myapp:${{ github.sha }}" >> $GITHUB_OUTPUT
+        docker build -t ${{ secrets.ECR_REPO }}/myapp:${{ github.sha }} .
+        docker tag ${{ secrets.ECR_REPO }}/myapp:${{ github.sha }} ${{ secrets.ECR_REPO }}/myapp:latest
+        docker push ${{ secrets.ECR_REPO }}/myapp:${{ github.sha }}
+        docker push ${{ secrets.ECR_REPO }}/myapp:latest
+        echo "image=${{ secrets.ECR_REPO }}/myapp:${{ github.sha }}" >> $GITHUB_OUTPUT
 
     - name: Download task definition
       run: |
