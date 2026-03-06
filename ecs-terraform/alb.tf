@@ -1,5 +1,5 @@
 # 1. The Application Load Balancer
-resource "aws_alb" "app_alb" {
+resource "aws_lb" "app_alb" {
   name               = "myapp-alb"
   internal           = false
   load_balancer_type = "application"
