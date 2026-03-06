@@ -1,5 +1,5 @@
 resource "aws_ecs_service" "app" {
-  name            = "myapp-service"
+  name            = "myapp-task-service"
   cluster         = aws_ecs_cluster.main.id
   task_definition = aws_ecs_task_definition.app.arn
   launch_type     = "FARGATE"
