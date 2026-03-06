@@ -1,6 +1,7 @@
 resource "aws_ecs_task_definition" "app" {
   family                   = "myapp-task"
   requires_compatibilities = ["FARGATE"]
+  network_mode             = "awsvpc"
   cpu                      = "256"
   memory                   = "512"
 
