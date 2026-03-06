@@ -1,20 +1,41 @@
-data "aws_iam_policy_document" "ecs_task_assume_role" {
-  statement {
-    actions = ["sts:AssumeRole"]
-    principals {
-      type        = "Service"
-      identifiers = ["ecs-tasks.amazonaws.com"]
-    }
-  }
+# 1. Create the IAM User for GitHub Actions
+resource "aws_iam_user" "github_actions" {
+  name = "github-actions-deployer"
 }
 
-resource "aws_iam_role" "ecs_task_execution_role" {
-  name               = "ecs-task-execution-role"
-  assume_role_policy = data.aws_iam_policy_document.ecs_task_assume_role.json
-}
+# 2. Create a policy allowing GitHub to access ECR and ECS
+resource "aws_iam_user_policy" "github_deploy_policy" {
+  name = "github-deploy-policy"
+  user = aws_iam_user.github_actions.name
 
-# Attach the standard AWS policy for ECS execution
-resource "aws_iam_role_policy_attachment" "ecs_execution_attachment" {
-  role       = aws_iam_role.ecs_task_execution_role.name
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "ecr:GetAuthorizationToken",
+          "ecr:BatchCheckLayerAvailability",
+          "ecr:GetDownloadUrlForLayer",
+          "ecr:BatchGetImage",
+          "ecr:PutImage",
+          "ecr:InitiateLayerUpload",
+          "ecr:UploadLayerPart",
+          "ecr:CompleteLayerUpload"
+        ]
+        Resource = "*"
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "ecs:UpdateService",
+          "ecs:DescribeServices",
+          "ecs:RegisterTaskDefinition",
+          "ecs:DescribeTaskDefinition",
+          "iam:PassRole"
+        ]
+        Resource = "*"
+      }
+    ]
+  })
 }
