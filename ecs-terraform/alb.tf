@@ -3,7 +3,7 @@ resource "aws_lb" "app_alb" {
   name               = "myapp-alb"
   internal           = false
   load_balancer_type = "application"
-  security_groups    = [aws_security_group.alb_sg.id] # Ensure you have an ALB SG defined
+  security_groups    = [alb-security-group] # Ensure you have an ALB SG defined
   subnets            = aws_subnet.public[*].id
 
   tags = {
