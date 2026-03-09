@@ -1,7 +1,5 @@
-# Fix for ALB DNS Output
 output "alb_dns" {
-  description = "The DNS name of the load balancer"
-  value       = aws_lb.app_alb.dns_name
+  value = aws_lb.alb.dns_name
 }
 
 # Fix for ECR Repo URL Output
