@@ -17,5 +17,5 @@ resource "aws_ecs_service" "service" {
     container_port   = 80
   }
 
-  depends_on = [aws_lb_listener.listener]
+  depends_on = [aws_lb_listener.listener,aws_ecs_cluster.cluster]
 }
