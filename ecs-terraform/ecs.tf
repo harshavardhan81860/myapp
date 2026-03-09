@@ -24,7 +24,7 @@ resource "aws_ecs_task_definition" "task" {
   ])
 }
 
-resource "aws_security_group" "ecs_sg" {
+resource "aws_ecs_security_group" "ecs_sg" {
   name   = "ecs-sg"
   vpc_id = aws_vpc.main.id
 
