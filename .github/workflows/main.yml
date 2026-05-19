@@ -14,9 +14,9 @@ jobs:
     runs-on: ubuntu-latest
     
     # Optional: If your terraform files are in a specific subfolder, uncomment below:
-    # defaults:
-    #   run:
-    #     working-directory: ./terraform
+     defaults:
+       run:
+         working-directory: ./ecs-terraform
 
     steps:
     - name: Checkout code
