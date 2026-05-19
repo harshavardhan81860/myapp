@@ -1,13 +1,65 @@
-name: Build and Push to ECR
+name: Build, Push to ECR, and Terraform CI
 
 on:
   push:
     branches:
       - main
+  pull_request:
+    branches:
+      - main
 
 jobs:
-  build:
+  terraform-ci:
+    name: "Terraform Validate & Plan"
     runs-on: ubuntu-latest
+    
+    # Optional: If your terraform files are in a specific subfolder, uncomment below:
+    # defaults:
+    #   run:
+    #     working-directory: ./terraform
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup HashiCorp Terraform
+      uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_version: 1.7.0 # Match your local Terraform version
+
+    - name: Check Terraform Format
+      id: fmt
+      run: terraform fmt -check
+      # This fails the workflow if your code isn't cleanly formatted via 'terraform fmt'
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: us-east-1
+
+    - name: Terraform Init
+      id: init
+      run: terraform init
+
+    - name: Terraform Validate
+      id: validate
+      run: terraform validate
+      # Checks for structural errors, missing variables, or incorrect argument types
+
+    - name: Terraform Plan
+      id: plan
+      run: terraform plan -no-color
+      # Generates the execution plan showing exactly what will be added, changed, or destroyed
+      env:
+        TF_VAR_image_tag: ${{ github.sha }} # Example of passing dynamic variables if needed
+
+  build:
+    name: "Build and Push App"
+    runs-on: ubuntu-latest
+    needs: terraform-ci # Optional: Only build the app if Terraform validation passes
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' # Only deploy on true merges to main
 
     steps:
     - name: Checkout code
